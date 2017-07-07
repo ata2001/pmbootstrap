@@ -1,0 +1,21 @@
+pkgname=luksipc
+pkgver="0.04"
+pkgrel=1
+pkgdesc="LUKS In-Place Conversion Tool"
+url="https://www.johannes-bauer.com/linux/luksipc"
+arch="all"
+license="GPL"
+depends="cryptsetup device-mapper"
+source="$pkgname-$pkgver.tar.gz::https://www.johannes-bauer.com/linux/${pkgname}/${pkgname}-${pkgver}.tar.gz"
+options="!check"
+
+build() {
+	cd $srcdir/"$pkgname"-"$pkgver"
+	make
+}
+
+package() {
+	install -Dm755 "$srcdir"/"$pkgname"-"$pkgver"/"$pkgname" "$pkgdir"/usr/bin/"$pkgname"
+}
+
+sha512sums="e96b0e281c4a469042e634a798a9ad88d7db91a5de73ed3bd523e65d8280bb293b460a2cbaf77a0562b0ff60672e7a2f74b901d1ec57b56a0e5c98b49969aa92  luksipc-0.04.tar.gz"
