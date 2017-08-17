@@ -95,6 +95,16 @@ def list_devices(args):
     pmb.flasher.run(args, "list_devices")
 
 
+def sideload(args):
+    # Mount the buildroot
+    mountpoint = "/mnt/buildroot_" + args.deviceinfo["arch"]
+    pmb.helpers.mount.bind(args, args.work + "/chroot_buildroot_"
+                                 + args.deviceinfo["arch"],
+                           args.work + "/chroot_native" + mountpoint)
+
+    pmb.flasher.run(args, "sideload")
+
+
 def export(args):
     # Create the export folder
     if not os.path.exists(args.export_folder):
@@ -123,5 +133,7 @@ def frontend(args):
         list_flavors(args)
     if action == "list_devices":
         list_devices(args)
+    if action == "sideload":
+        sideload(args)
     if action == "export":
         export(args)

@@ -292,6 +292,14 @@ flashers = {
                 ["heimdall", "flash", "--$PARTITION_KERNEL", "$BOOT/boot.img-$FLAVOR"]],
         },
     },
+    "adb": {
+            "depends": ["android-tools"],
+            "actions":
+            {
+                "list_devices": [["adb", "devices"]],
+                "sideload": [["adb", "sideload", "$RECOVERY_ZIP"]],
+            }
+    },
 }
 
 #

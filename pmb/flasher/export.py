@@ -31,6 +31,9 @@ def export(args, flavor, folder):
     logging.info("Export symlinks to: " + folder)
     if args.odin_flashable_tar:
         odin_flashable_tar(args, flavor, folder)
+    if args.android_recovery_zip:
+        android_recovery_zip(args, folder)
+        return
     symlinks(args, flavor, folder)
 
 
@@ -73,6 +76,18 @@ def symlinks(args, flavor, folder):
         logging.info(msg)
 
         pmb.helpers.file.symlink(args, file, link)
+
+def android_recovery_zip(args, folder):
+    """
+    Export android recovery compatible zip.
+    """
+    recovery_zip = "pmos-" + args.device + ".zip"
+    file = "".join([args.work, "/chroot_native",
+        "/usr/share/postmarketos-android-recovery-installer/",
+        recovery_zip])
+    link = folder + "/" + recovery_zip
+    pmb.helpers.file.symlink(args, file, link)
+    logging.info(" * " + recovery_zip + " (android recovery flashable zip)")
 
 
 def odin_flashable_tar(args, flavor, folder):

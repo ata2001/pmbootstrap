@@ -27,16 +27,17 @@ import pmb.chroot.initfs
 import pmb.config
 import pmb.helpers.run
 import pmb.install.blockdevice
+import pmb.install.recovery
 import pmb.install
 
 
-def mount_device_rootfs(args):
-    # Mount the device rootfs
-    logging.info("(native) copy rootfs_" + args.device + " to" +
-                 " /mnt/install/")
+def mount_device_rootfs(args, suffix="native"):
+    """
+    Mount the device rootfs.
+    """
     mountpoint = "/mnt/rootfs_" + args.device
     pmb.helpers.mount.bind(args, args.work + "/chroot_rootfs_" + args.device,
-                           args.work + "/chroot_native" + mountpoint)
+                           args.work + "/chroot_" + suffix + mountpoint)
     return mountpoint
 
 
@@ -106,14 +107,18 @@ def set_user_password(args):
 
 
 def install(args):
+    # Number of steps for the different installation methods.
+    steps = 4 if args.android_recovery_zip else 5
+
     # Install required programs in native chroot
-    logging.info("*** (1/5) PREPARE NATIVE CHROOT ***")
+    logging.info("*** (1/{}) PREPARE NATIVE CHROOT ***".format(steps))
     pmb.chroot.apk.install(args, pmb.config.install_native_packages,
                            build=False)
 
     # List all packages to be installed (including the ones specified by --add)
     # and upgrade the installed packages/apkindexes
-    logging.info("*** (2/5) CREATE DEVICE ROOTFS (" + args.device + ") ***")
+    logging.info('*** (2/{0}) CREATE DEVICE ROOTFS ("{1}") ***'.format(steps,
+        args.device))
     install_packages = (pmb.config.install_device_packages +
                         ["device-" + args.device])
     if args.ui.lower() != "none":
@@ -143,15 +148,36 @@ def install(args):
     # Finally set the user password
     set_user_password(args)
 
+    if args.android_recovery_zip:
+        logging.info("*** (3/{}) CREATING RECOVERY-FLASHABLE ZIP ***".format(
+            steps))
+        buildroot = "buildroot_" + args.deviceinfo["arch"]
+        mount_device_rootfs(args, buildroot)
+        pmb.install.recovery.create_zip(args, buildroot)
+
+        # Flash information
+        logging.info("*** (4/{}) FLASHING TO DEVICE ***".format(steps))
+        logging.info("Run the following to flash your installation to the"
+                     " target device:")
+        logging.info("* pmbootstrap flasher --flash-method adb sideload")
+        logging.info("  Flashes the installer zip to your device:")
+
+        # Export information
+        logging.info("* If the above steps do not work, you can also create a"
+                     " symlink to the generated zip with 'pmbootstrap flasher"
+                     " export --android-recovery-zip [export_folder]' and"
+                     " flash outside of pmbootstrap.")
+        return
+
     # Partition and fill image/sdcard
-    logging.info("*** (3/5) PREPARE INSTALL BLOCKDEVICE ***")
+    logging.info("*** (3/{}) PREPARE INSTALL BLOCKDEVICE ***".format(steps))
     pmb.chroot.shutdown(args, True)
     pmb.install.blockdevice.create(args, size_image)
     pmb.install.partition(args, size_boot)
     pmb.install.format(args)
 
     # Just copy all the files
-    logging.info("*** (4/5) FILL INSTALL BLOCKDEVICE ***")
+    logging.info("*** (4/{}) FILL INSTALL BLOCKDEVICE ***".format(steps))
     copy_files(args)
     fix_mount_folders(args)
     pmb.chroot.shutdown(args, True)
@@ -168,7 +194,7 @@ def install(args):
                         working_dir="/home/user/rootfs/")
 
     # Kernel flash information
-    logging.info("*** (5/5) FLASHING TO DEVICE ***")
+    logging.info("*** (5/{}) FLASHING TO DEVICE ***".format(steps))
     logging.info("Run the following to flash your installation to the"
                  " target device:")
     logging.info("* pmbootstrap flasher flash_kernel")
