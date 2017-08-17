@@ -1,5 +1,7 @@
-#!/sbin/sh
-. /tmp/postmarketos/bin/pmos_install_functions $1 $2
+#!/sbin/ash
+# shellcheck source=pmos_install_functions
+. /tmp/postmarketos/bin/pmos_install_functions "$1" "$2"
+# shellcheck source=/dev/null
 . "$WORKING_DIR"/install_options
 
 exec > "$WORKING_DIR"/pmos.log 2>&1
@@ -20,7 +22,7 @@ ui_print "Unmounting /$INSTALL_PARTITION..."
 umount_install_partition
 ui_print "Creating partition table on $INSTALL_DEVICE..."
 partition_install_device
-if [ "$FDE" == "true" ]
+if [ "$FDE" = "true" ]
 then
 	ui_print "Generating temporary keyfile with random data..."
 	dd bs=512 count=4 if=/dev/urandom of="$WORKING_DIR"/lukskey
@@ -45,12 +47,12 @@ mkdir /"$INSTALL_PARTITION"/boot
 mount -t ext2 -rw "$PMOS_BOOT" /"$INSTALL_PARTITION"/boot
 ui_print "Installing rootfs..."
 tar -xf rootfs.tar.gz -C /"$INSTALL_PARTITION"
-if [ "$FLASH_BOOTIMG" == "true" ]
+if [ "$FLASH_BOOTIMG" = "true" ]
 then
-	ui_print "Flashing boot.img"
+	ui_print "Flashing boot.img..."
 	dd if=boot.img of="$BOOT"
 fi
-if [ "$FDE" == "true" ]
+if [ "$FDE" = "true" ]
 then
 	ui_print "Creating a symlink for password setting script in /sbin/..."
 	ln -s "$WORKING_DIR"/bin/pmos_setpw /sbin/

@@ -99,7 +99,7 @@ def sideload(args):
     # Mount the buildroot
     mountpoint = "/mnt/buildroot_" + args.deviceinfo["arch"]
     pmb.helpers.mount.bind(args, args.work + "/chroot_buildroot_"
-                                 + args.deviceinfo["arch"],
+                                             + args.deviceinfo["arch"],
                            args.work + "/chroot_native" + mountpoint)
 
     pmb.flasher.run(args, "sideload")

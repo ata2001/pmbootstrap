@@ -77,14 +77,15 @@ def symlinks(args, flavor, folder):
 
         pmb.helpers.file.symlink(args, file, link)
 
+
 def android_recovery_zip(args, folder):
     """
     Export android recovery compatible zip.
     """
     recovery_zip = "pmos-" + args.device + ".zip"
     file = "".join([args.work, "/chroot_native",
-        "/usr/share/postmarketos-android-recovery-installer/",
-        recovery_zip])
+                    "/usr/share/postmarketos-android-recovery-installer/",
+                    recovery_zip])
     link = folder + "/" + recovery_zip
     pmb.helpers.file.symlink(args, file, link)
     logging.info(" * " + recovery_zip + " (android recovery flashable zip)")

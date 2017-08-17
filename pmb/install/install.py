@@ -118,7 +118,7 @@ def install(args):
     # List all packages to be installed (including the ones specified by --add)
     # and upgrade the installed packages/apkindexes
     logging.info('*** (2/{0}) CREATE DEVICE ROOTFS ("{1}") ***'.format(steps,
-        args.device))
+                 args.device))
     install_packages = (pmb.config.install_device_packages +
                         ["device-" + args.device])
     if args.ui.lower() != "none":
@@ -150,7 +150,7 @@ def install(args):
 
     if args.android_recovery_zip:
         logging.info("*** (3/{}) CREATING RECOVERY-FLASHABLE ZIP ***".format(
-            steps))
+                     steps))
         buildroot = "buildroot_" + args.deviceinfo["arch"]
         mount_device_rootfs(args, buildroot)
         pmb.install.recovery.create_zip(args, buildroot)
