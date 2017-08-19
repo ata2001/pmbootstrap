@@ -25,6 +25,7 @@ import pmb.helpers.cli
 import pmb.helpers.devices
 import pmb.helpers.ui
 import pmb.chroot.zap
+import pmb.parse.deviceinfo
 
 
 def ask_for_work_path(args):
@@ -60,6 +61,24 @@ def ask_for_ui(args):
                       " one from the list above.")
 
 
+def ask_for_keymaps(args, device):
+    info = pmb.parse.deviceinfo(args, device=device)
+    if "keymaps" not in info or info["keymaps"].strip() == "":
+        return ""
+    options = info["keymaps"].split(' ')
+    logging.info("Available keymaps for device (" + str(len(options)) +
+                 "): " + ", ".join(options))
+    if args.keymap is "":
+        args.keymap = options[0]
+
+    while True:
+        ret = pmb.helpers.cli.ask(args, "Keymap", None, args.keymap, True)
+        if ret in options:
+            return ret
+        logging.fatal("ERROR: Invalid keymap specified, please type in"
+                      " one from the list above.")
+
+
 def init(args):
     cfg = pmb.config.load(args)
 
@@ -71,6 +90,12 @@ def init(args):
                  ", ".join(devices))
     cfg["pmbootstrap"]["device"] = pmb.helpers.cli.ask(args, "Device",
                                                        None, args.device, False, "[a-z0-9]+-[a-z0-9]+")
+
+    device_exists = os.path.exists(args.aports + "/device/device-" + cfg["pmbootstrap"]["device"] + "/deviceinfo")
+
+    # Device keymap
+    if device_exists:
+        cfg["pmbootstrap"]["keymap"] = ask_for_keymaps(args, device=cfg["pmbootstrap"]["device"])
 
     # UI and work folder
     cfg["pmbootstrap"]["ui"] = ask_for_ui(args)
@@ -104,11 +129,10 @@ def init(args):
     # Save config
     pmb.config.save(args, cfg)
 
-    if len(glob.glob(args.work + "/chroot_*")) and pmb.helpers.cli.confirm(args, "Zap existing chroots to apply configuration?", default=True):
-        if not os.path.exists(args.aports + "/device/device-" + args.device + "/deviceinfo"):
-            setattr(args, "deviceinfo", None)
-        else:
-            setattr(args, "deviceinfo", pmb.parse.deviceinfo(args))
+    if (device_exists and
+            len(glob.glob(args.work + "/chroot_*")) and
+            pmb.helpers.cli.confirm(args, "Zap existing chroots to apply configuration?", default=True)):
+        setattr(args, "deviceinfo", pmb.parse.deviceinfo(args, device=cfg["pmbootstrap"]["device"]))
         # Do not zap any existing packages or cache_http directories
         pmb.chroot.zap(args, confirm=False)
 
