@@ -103,7 +103,7 @@ def sideload(args):
                            args.work + "/chroot_native/" + mountpoint)
 
     # Missing recovery zip error
-    zip_path = ("/usr/share/postmarketos-android-recovery-installer/pmos-" +
+    zip_path = ("/var/lib/postmarketos-android-recovery-installer/pmos-" +
                 args.device + ".zip")
     if not os.path.exists(args.work + "/chroot_native" + mountpoint +
                           zip_path):

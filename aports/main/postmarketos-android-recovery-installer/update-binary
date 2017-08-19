@@ -2,7 +2,7 @@
 # Print fail information
 OUTFD=$2
 fail_info() {
-	FAIL_MSG="Failed. Check $WORKING_DIR/pmos.log for more info!"
+	FAIL_MSG="Failed. Check /tmp/postmarketos/pmos.log for more info!"
 	echo -n -e "ui_print $FAIL_MSG\n" > /proc/self/fd/"$OUTFD"
 	echo -n -e "ui_print\n" > /proc/self/fd/"$OUTFD"
 }

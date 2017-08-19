@@ -16,18 +16,18 @@ license="GPL3"
 package() {
 	install -Dm755 "$srcdir/build_zip.sh" \
 		"$pkgdir/sbin/build-recovery-zip"
-	mkdir -p "$pkgdir/usr/share/postmarketos-android-recovery-installer/META-INF/com/google/android/"
+	mkdir -p "$pkgdir/var/lib/postmarketos-android-recovery-installer/META-INF/com/google/android/"
 	install -Dm644 "$srcdir"/update-binary \
-		"$pkgdir/usr/share/postmarketos-android-recovery-installer/META-INF/com/google/android/update-binary"
+		"$pkgdir/var/lib/postmarketos-android-recovery-installer/META-INF/com/google/android/update-binary"
 	mkdir -p "$pkgdir/usr/sahre/postmarketos-android-recovery-installer/bin/"
 	for file in pmos_install pmos_install_functions pmos_setpw; do
 		install -Dm755 "$srcdir/$file" \
-			"$pkgdir/usr/share/postmarketos-android-recovery-installer/bin/$file"
+			"$pkgdir/var/lib/postmarketos-android-recovery-installer/bin/$file"
 	done
 	mkdir -p "$pkgdir/usr/sahre/postmarketos-android-recovery-installer/lib/"
 }
 sha512sums="f5e42954dcdd1fbca89f83ab002e8604b7105efbfacdf9618d7a8dc3a9e20a2a50df9823e63ddb289c2e423a63317edbc007cf14f7699baaaeda3520f2fb4164  build_zip.sh
-47be5b2954e1633a5601620e876a378207707f786710a2228b8aebc7f2ecc0357dbca6beacd407508dfdf65e8372ed0212609cea92100b7cd17dcb28c06e38e1  update-binary
-0263acd0987566940499cb2b8b59257000fc7841850e34f0fdd48bbea42270f2ee0a31ed64d435c78136ec3d02108d53fe32a372306454313447d48e47fa441a  pmos_install
+e5c46810d0e2bf85e646bba1b0962d04b5b35b91f8a596bd3f806b4a6e8a801040193c0950847501073166ab87ac097b291aad1e7a27b4877d5ff8bac297b3db  update-binary
+940f276e2494f003f82f44483b61362f9ce5c56f891b7e2a4231df7bbc2c0f7515523492aca713985f4b818f1faf59245d74069c412c8c1d415cf95db61bd403  pmos_install
 21981f5f56c1c253982d47b71cd0e1e4febfc65ec060d1baab010dc6f8b10e02c14d97f09388d39c1dfc8a50e0b7b5f8136ea8d28b3cf861ec2a76c19ef4901d  pmos_install_functions
 ac6d7d7844be74fdb9cd9ee88031a26587af80d403edcfebf2820deaf61757fa360c2cd00cca2572b45d3f27b4d423bcb1274cc551cc67560e06c65f877a5f1a  pmos_setpw"

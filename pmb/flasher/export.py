@@ -84,7 +84,7 @@ def android_recovery_zip(args, folder):
     """
     recovery_zip = "pmos-" + args.device + ".zip"
     file = "".join([args.work, "/chroot_native",
-                    "/usr/share/postmarketos-android-recovery-installer/",
+                    "/var/lib/postmarketos-android-recovery-installer/",
                     recovery_zip])
     link = folder + "/" + recovery_zip
     pmb.helpers.file.symlink(args, file, link)

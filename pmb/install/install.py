@@ -211,7 +211,7 @@ def install_recovery_zip(args):
     logging.info("  Flashes the installer zip to your device:")
 
     # Export information
-    logging.info("* If the above steps do not work, you can also create a"
+    logging.info("* If this does not work, you can also create a"
                  " symlink to the generated zip with 'pmbootstrap flasher"
                  " export --android-recovery-zip [export_folder]' and"
                  " flash outside of pmbootstrap.")

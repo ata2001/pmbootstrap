@@ -43,7 +43,7 @@ def run(args, action, flavor=None):
         "$PARTITION_INITFS": args.deviceinfo["flash_heimdall_partition_initfs"],
         "$PARTITION_KERNEL": args.deviceinfo["flash_heimdall_partition_kernel"],
         "$RECOVERY_ZIP": "/mnt/buildroot_" + args.deviceinfo["arch"] +
-                         "/usr/share/postmarketos-android-recovery-installer"
+                         "/var/lib/postmarketos-android-recovery-installer"
                          "/pmos-" + args.device + ".zip",
     }
 

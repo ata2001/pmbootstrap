@@ -290,7 +290,8 @@ flashers = {
             "actions":
             {
                 "list_devices": [["adb", "devices"]],
-                "sideload": [["adb", "sideload", "$RECOVERY_ZIP"]],
+                "sideload": [["adb", "wait-for-usb-sideload"],
+                             ["adb", "sideload", "$RECOVERY_ZIP"]],
             }
     },
 }

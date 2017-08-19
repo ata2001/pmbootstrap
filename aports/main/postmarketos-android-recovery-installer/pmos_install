@@ -21,7 +21,8 @@ ln -s "$WORKING_DIR"/lib/* /lib/
 ui_print "Unmounting /$INSTALL_PARTITION..."
 umount_install_partition
 ui_print "Creating partition table on $INSTALL_DEVICE..."
-partition_install_device
+# parted returns nonzero even when command executed successfully
+partition_install_device || :
 if [ "$FDE" = "true" ]
 then
 	ui_print "Generating temporary keyfile with random data..."

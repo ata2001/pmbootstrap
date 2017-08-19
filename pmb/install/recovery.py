@@ -1,3 +1,5 @@
+import logging
+
 import pmb.chroot
 
 
@@ -5,13 +7,15 @@ def create_zip(args, suffix):
     """
     Create android recovery compatible installer zip.
     """
-    zip_root = "/usr/share/postmarketos-android-recovery-installer/"
+    zip_root = "/var/lib/postmarketos-android-recovery-installer/"
     rootfs = "/mnt/rootfs_" + args.device
 
     # Install recovery installer package in buildroot
     pmb.chroot.apk.install(args,
                            ["postmarketos-android-recovery-installer"],
                            suffix)
+
+    logging.info("(" + suffix + ") create recovery zip")
 
     # Create config file for the recovery installer
     with open(args.work + "/chroot_" + suffix + "/tmp/install_options",
