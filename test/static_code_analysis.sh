@@ -25,6 +25,11 @@ sh_files="
 	./test/static_code_analysis.sh
 	./aports/main/postmarketos-mkinitfs/init.sh.in
 	./aports/main/postmarketos-mkinitfs/init_functions.sh
+	./aports/main/postmarketos-android-recovery-installer/build_zip.sh
+	./aports/main/postmarketos-android-recovery-installer/pmos_install
+	./aports/main/postmarketos-android-recovery-installer/pmos_install_functions
+	./aports/main/postmarketos-android-recovery-installer/pmos_setpw
+	./aports/main/postmarketos-android-recovery-installer/update-binary
 	$(find . -name '*.trigger')
 "
 for file in ${sh_files}; do

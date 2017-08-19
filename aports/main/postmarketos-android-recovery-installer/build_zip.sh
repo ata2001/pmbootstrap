@@ -25,6 +25,7 @@ check_whether_exists()
 . ./install_options
 
 BINARIES="/sbin/cryptsetup /sbin/kpartx /usr/sbin/parted /usr/sbin/partprobe"
+# shellcheck disable=SC2086
 LIBRARIES=$(lddtree -l $BINARIES | awk '/lib/ {print}' | sort -u)
 copy_files "$BINARIES" bin/
 copy_files "$LIBRARIES" lib/
