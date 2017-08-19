@@ -50,7 +50,7 @@ def arguments_flasher(subparser):
                                               " /tmp/postmarketOS-export",
                         default="/tmp/postmarketOS-export", nargs="?")
     export.add_argument("--android-recovery-zip",
-                        help="export an android recovery flashable zip",
+                        help="export android recovery flashable zip",
                         action="store_true", dest="android_recovery_zip")
     export.add_argument("--odin", help="odin flashable tar (boot.img/kernel+initramfs only)",
                         action="store_true", dest="odin_flashable_tar")
@@ -185,7 +185,7 @@ def arguments():
     install.add_argument("--no-fde", help="do not use full disk encryption",
                          action="store_false", dest="full_disk_encryption")
     install.add_argument("--android-recovery-zip",
-                         help="generate a TWRP flashable zip",
+                         help="generate TWRP flashable zip",
                          action="store_true", dest="android_recovery_zip")
     install.add_argument("--recovery-flash_bootimg",
                          help="include kernel in recovery flashable zip",

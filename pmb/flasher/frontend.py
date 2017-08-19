@@ -97,10 +97,19 @@ def list_devices(args):
 
 def sideload(args):
     # Mount the buildroot
-    mountpoint = "/mnt/buildroot_" + args.deviceinfo["arch"]
-    pmb.helpers.mount.bind(args, args.work + "/chroot_buildroot_"
-                                             + args.deviceinfo["arch"],
-                           args.work + "/chroot_native" + mountpoint)
+    suffix = "buildroot_" + args.deviceinfo["arch"]
+    mountpoint = "/mnt/" + suffix
+    pmb.helpers.mount.bind(args, args.work + "/chroot_" + suffix,
+                           args.work + "/chroot_native/" + mountpoint)
+
+    # Missing recovery zip error
+    zip_path = ("/usr/share/postmarketos-android-recovery-installer/pmos-" +
+                args.device + ".zip")
+    if not os.path.exists(args.work + "/chroot_native" + mountpoint +
+                          zip_path):
+        raise RuntimeError("The recovery zip has not been generated yet,"
+                           " please run 'pmbootstrap install' with the"
+                           " '--android-recovery-zip' parameter first!")
 
     pmb.flasher.run(args, "sideload")
 

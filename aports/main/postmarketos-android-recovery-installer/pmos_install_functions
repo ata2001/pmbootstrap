@@ -78,7 +78,3 @@ umount_install_partition() {
 		return 0
 	fi
 }
-
-set_password() {
-	cryptsetup luksAddKey -d "$WORKING_DIR"/lukskey "$ROOT_PARTITION"
-}

@@ -32,8 +32,8 @@ def create_zip(args, suffix):
         # Copy boot.img to zip root
         ["cp", rootfs + "/boot/boot.img-" + args.device, "boot.img"],
         # Create tar archive of the rootfs
-        ["tar", "-pczf", "rootfs.tar.gz", "-C",
-         rootfs, "."],
+        ["tar", "-pczf", "rootfs.tar.gz", "--exclude", "./home/user/*",
+         "-C", rootfs, "."],
         ["build-recovery-zip"]]
     for command in commands:
         pmb.chroot.root(args, command, suffix, working_dir=zip_root)

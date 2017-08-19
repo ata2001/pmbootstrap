@@ -25,12 +25,9 @@ check_whether_exists()
 . ./install_options
 
 BINARIES="/sbin/cryptsetup /sbin/kpartx /usr/sbin/parted /usr/sbin/partprobe"
-LIBRARIES=$(lddtree -l "$BINARIES" | awk '/lib/ {print}' | sort -u)
+LIBRARIES=$(lddtree -l $BINARIES | awk '/lib/ {print}' | sort -u)
 copy_files "$BINARIES" bin/
 copy_files "$LIBRARIES" lib/
 check_whether_exists rootfs.tar.gz
-if [ "$FLASH_BOOT" = "true" ]
-then
-	check_whether_exists boot.img
-fi
+[ "$FLASH_BOOT" = "true" ] && check_whether_exists boot.img
 zip -r "pmos-$DEVICE.zip" .

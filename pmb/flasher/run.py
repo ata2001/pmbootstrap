@@ -51,8 +51,8 @@ def run(args, action, flavor=None):
         "$PAGE_SIZE": args.deviceinfo["flash_pagesize"],
         "$PARTITION_INITFS": args.deviceinfo["flash_heimdall_partition_initfs"],
         "$PARTITION_KERNEL": args.deviceinfo["flash_heimdall_partition_kernel"],
-        "$RECOVERY_ZIP": "/mnt/buildroot_" + args.deviceinfo["arch"]
-                         + "/usr/share/postmarketos-android-recovery-installer"
+        "$RECOVERY_ZIP": "/mnt/buildroot_" + args.deviceinfo["arch"] +
+                         "/usr/share/postmarketos-android-recovery-installer"
                          "/pmos-" + args.device + ".zip",
     }
 

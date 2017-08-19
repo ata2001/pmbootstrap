@@ -16,7 +16,7 @@ cd "$WORKING_DIR"
 ui_print "Extracting files..."
 unzip -o "$ZIP"
 mkdir /lib
-ui_print "Symlinking .so files to /lib/"
+ui_print "Symlinking .so files to /lib/..."
 ln -s "$WORKING_DIR"/lib/* /lib/
 ui_print "Unmounting /$INSTALL_PARTITION..."
 umount_install_partition

@@ -106,6 +106,85 @@ def set_user_password(args):
             pass
 
 
+def install_system_image(args):
+    size_image = str(int(float(get_chroot_size(args)) * 1.15)) + "M"
+    size_boot = str(int(get_chroot_boot_size(args)) + 5) + "M"
+
+    # Partition and fill image/sdcard
+    logging.info("*** (3/5) PREPARE INSTALL BLOCKDEVICE ***")
+    pmb.chroot.shutdown(args, True)
+    pmb.install.blockdevice.create(args, size_image)
+    pmb.install.partition(args, size_boot)
+    pmb.install.format(args)
+
+    # Just copy all the files
+    logging.info("*** (4/5) FILL INSTALL BLOCKDEVICE ***")
+    copy_files(args)
+    fix_mount_folders(args)
+    pmb.chroot.shutdown(args, True)
+
+    # Convert system image to sparse using img2simg
+    if args.deviceinfo["flash_sparse"] == "true":
+        logging.info("(native) make sparse system image")
+        pmb.chroot.apk.install(args, ["libsparse"])
+        sys_image = args.device + ".img"
+        sys_image_sparse = args.device + "-sparse.img"
+        pmb.chroot.user(args, ["img2simg", sys_image, sys_image_sparse],
+                        working_dir="/home/user/rootfs/")
+        pmb.chroot.user(args, ["mv", "-f", sys_image_sparse, sys_image],
+                        working_dir="/home/user/rootfs/")
+
+    # Kernel flash information
+    logging.info("*** (5/5) FLASHING TO DEVICE ***")
+    logging.info("Run the following to flash your installation to the"
+                 " target device:")
+    logging.info("* pmbootstrap flasher flash_kernel")
+    logging.info("  Flashes the kernel + initramfs to your device:")
+    logging.info("  " + args.work + "/chroot_rootfs_" + args.device +
+                 "/boot")
+    method = args.deviceinfo["flash_methods"]
+    if (method in pmb.config.flashers and "boot" in
+            pmb.config.flashers[method]["actions"]):
+        logging.info("  (NOTE: " + method + " also supports booting"
+                     " the kernel/initramfs directly without flashing."
+                     " Use 'pmbootstrap flasher boot' to do that.)")
+
+    # System flash information
+    if not args.sdcard:
+        logging.info("* pmbootstrap flasher flash_system")
+        logging.info("  Flashes the system image, that has been"
+                     " generated to your device:")
+        logging.info("  " + args.work + "/chroot_native/home/user/rootfs/" +
+                     args.device + ".img")
+        logging.info("  (NOTE: This file has a partition table,"
+                     " which contains a boot- and root subpartition.)")
+
+    # Export information
+    logging.info("* If the above steps do not work, you can also create"
+                 " symlinks to the generated files with 'pmbootstrap flasher"
+                 " export [export_folder]' and flash outside of pmbootstrap.")
+
+
+def install_recovery_zip(args):
+    logging.info("*** (3/4) CREATING RECOVERY-FLASHABLE ZIP ***")
+    suffix = "buildroot_" + args.deviceinfo["arch"]
+    mount_device_rootfs(args, suffix)
+    pmb.install.recovery.create_zip(args, suffix)
+
+    # Flash information
+    logging.info("*** (4/4) FLASHING TO DEVICE ***")
+    logging.info("Run the following to flash your installation to the"
+                 " target device:")
+    logging.info("* pmbootstrap flasher --flash-method adb sideload")
+    logging.info("  Flashes the installer zip to your device:")
+
+    # Export information
+    logging.info("* If the above steps do not work, you can also create a"
+                 " symlink to the generated zip with 'pmbootstrap flasher"
+                 " export --android-recovery-zip [export_folder]' and"
+                 " flash outside of pmbootstrap.")
+
+
 def install(args):
     # Number of steps for the different installation methods.
     steps = 4 if args.android_recovery_zip else 5
@@ -142,83 +221,10 @@ def install(args):
     for flavor in pmb.chroot.other.kernel_flavors_installed(args, suffix):
         pmb.chroot.initfs.build(args, flavor, suffix)
 
-    size_image = str(int(float(get_chroot_size(args)) * 1.15)) + "M"
-    size_boot = str(int(get_chroot_boot_size(args)) + 5) + "M"
-
     # Finally set the user password
     set_user_password(args)
 
     if args.android_recovery_zip:
-        logging.info("*** (3/{}) CREATING RECOVERY-FLASHABLE ZIP ***".format(
-                     steps))
-        buildroot = "buildroot_" + args.deviceinfo["arch"]
-        mount_device_rootfs(args, buildroot)
-        pmb.install.recovery.create_zip(args, buildroot)
-
-        # Flash information
-        logging.info("*** (4/{}) FLASHING TO DEVICE ***".format(steps))
-        logging.info("Run the following to flash your installation to the"
-                     " target device:")
-        logging.info("* pmbootstrap flasher --flash-method adb sideload")
-        logging.info("  Flashes the installer zip to your device:")
-
-        # Export information
-        logging.info("* If the above steps do not work, you can also create a"
-                     " symlink to the generated zip with 'pmbootstrap flasher"
-                     " export --android-recovery-zip [export_folder]' and"
-                     " flash outside of pmbootstrap.")
-        return
-
-    # Partition and fill image/sdcard
-    logging.info("*** (3/{}) PREPARE INSTALL BLOCKDEVICE ***".format(steps))
-    pmb.chroot.shutdown(args, True)
-    pmb.install.blockdevice.create(args, size_image)
-    pmb.install.partition(args, size_boot)
-    pmb.install.format(args)
-
-    # Just copy all the files
-    logging.info("*** (4/{}) FILL INSTALL BLOCKDEVICE ***".format(steps))
-    copy_files(args)
-    fix_mount_folders(args)
-    pmb.chroot.shutdown(args, True)
-
-    # Convert system image to sparse using img2simg
-    if args.deviceinfo["flash_sparse"] == "true":
-        logging.info("(native) make sparse system image")
-        pmb.chroot.apk.install(args, ["libsparse"])
-        sys_image = args.device + ".img"
-        sys_image_sparse = args.device + "-sparse.img"
-        pmb.chroot.user(args, ["img2simg", sys_image, sys_image_sparse],
-                        working_dir="/home/user/rootfs/")
-        pmb.chroot.user(args, ["mv", "-f", sys_image_sparse, sys_image],
-                        working_dir="/home/user/rootfs/")
-
-    # Kernel flash information
-    logging.info("*** (5/{}) FLASHING TO DEVICE ***".format(steps))
-    logging.info("Run the following to flash your installation to the"
-                 " target device:")
-    logging.info("* pmbootstrap flasher flash_kernel")
-    logging.info("  Flashes the kernel + initramfs to your device:")
-    logging.info("  " + args.work + "/chroot_rootfs_" + args.device +
-                 "/boot")
-    method = args.deviceinfo["flash_methods"]
-    if (method in pmb.config.flashers and "boot" in
-            pmb.config.flashers[method]["actions"]):
-        logging.info("  (NOTE: " + method + " also supports booting"
-                     " the kernel/initramfs directly without flashing."
-                     " Use 'pmbootstrap flasher boot' to do that.)")
-
-    # System flash information
-    if not args.sdcard:
-        logging.info("* pmbootstrap flasher flash_system")
-        logging.info("  Flashes the system image, that has been"
-                     " generated to your device:")
-        logging.info("  " + args.work + "/chroot_native/home/user/rootfs/" +
-                     args.device + ".img")
-        logging.info("  (NOTE: This file has a partition table,"
-                     " which contains a boot- and root subpartition.)")
-
-    # Export information
-    logging.info("* If the above steps do not work, you can also create"
-                 " symlinks to the generated files with 'pmbootstrap flasher"
-                 " export [export_folder]' and flash outside of pmbootstrap.")
+        install_recovery_zip(args)
+    else:
+        install_system_image(args)

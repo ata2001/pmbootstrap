@@ -5,7 +5,7 @@
 extract_partition_table
 set_subpartitions
 echo "Set the password of the encrypted rootfs!"
-set_password
-#Remove temporary keyfile
+cryptsetup luksAddKey -d "$WORKING_DIR"/lukskey "$ROOT_PARTITION"
+# Remove temporary keyfile
 cryptsetup luksRemoveKey "$ROOT_PARTITION" "$WORKING_DIR"/lukskey
 echo "Successfully added key to the LUKS device."
