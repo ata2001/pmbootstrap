@@ -109,6 +109,9 @@ def arguments():
     parser.add_argument("-j", "--jobs", help="parallel jobs when compiling")
     parser.add_argument("-p", "--aports",
                         help="postmarketos aports paths")
+    parser.add_argument("-s", "--skip-initfs", dest="skip_initfs",
+                        help="do not re-generate the initramfs",
+                        action="store_true")
     parser.add_argument("-w", "--work", help="folder where all data"
                         " gets stored (chroots, caches, built packages)")
 
@@ -140,7 +143,7 @@ def arguments():
         "log_distccd",
         help="follow the distccd logfile")
     for action in [log, log_distccd]:
-        action.add_argument("-n", "--lines", default="30",
+        action.add_argument("-n", "--lines", default="60",
                             help="count of initial output lines")
         action.add_argument("-c", "--clear", help="clear the log",
                             action="store_true", dest="clear_log")
@@ -233,6 +236,12 @@ def arguments():
     parse_apkindex = sub.add_parser("parse_apkindex")
     parse_apkindex.add_argument("apkindex_path")
     parse_apkindex.add_argument("package", default=None, nargs="?")
+
+    # Action: config
+    config = sub.add_parser("config",
+                            help="get and set pmbootstrap options")
+    config.add_argument("name", nargs="?", help="variable name")
+    config.add_argument("value", nargs="?", help="set variable to value")
 
     # Action: qemu
     qemu = sub.add_parser("qemu")

@@ -26,6 +26,7 @@ import pmb.chroot.other
 import pmb.chroot.initfs
 import pmb.config
 import pmb.helpers.run
+import pmb.helpers.other
 import pmb.install.blockdevice
 import pmb.install.recovery
 import pmb.install
@@ -41,51 +42,65 @@ def mount_device_rootfs(args, suffix="native"):
     return mountpoint
 
 
-def get_chroot_size(args):
+def get_subpartitions_size(args):
+    """
+    Calculate the size of the whole image and boot subpartition.
+
+    :returns: (full, boot) the size of the full image and boot
+              partition as integer in bytes
+    """
+    # Calculate required sizes first
+    chroot = args.work + "/chroot_rootfs_" + args.device
+    root = pmb.helpers.other.folder_size(args, chroot)
+    boot = pmb.helpers.other.folder_size(args, chroot + "/boot")
+    home = pmb.helpers.other.folder_size(args, chroot + "/home")
+
+    # The home folder gets omitted when copying the rootfs to
+    # /dev/installp2
+    full = root - home
+
+    # Add some free space, see also:
+    # https://github.com/postmarketOS/pmbootstrap/pull/336
+    full *= 1.20
+    boot += 15 * 1024 * 1024
+    return (full, boot)
+
+
+def copy_files_from_chroot(args):
+    """
+    Copy all files from the rootfs chroot to /mnt/install, except
+    for the home folder (because /home will contain some empty
+    mountpoint folders).
+    """
     # Mount the device rootfs
+    logging.info("(native) copy rootfs_" + args.device + " to" +
+                 " /mnt/install/")
     mountpoint = mount_device_rootfs(args)
+    mountpoint_outside = args.work + "/chroot_native" + mountpoint
 
-    # Run the du command
-    result = pmb.chroot.root(args, ["sh", "-c", "du -cm . | grep total$ | cut -f1"],
-                             working_dir=mountpoint, return_stdout=True)
-    return result
-
-
-def get_chroot_boot_size(args):
-    # Mount the device rootfs
-    mountpoint = mount_device_rootfs(args)
-
-    # Run the du command
-    result = pmb.chroot.root(args, ["sh", "-c", "du -cm ./boot | grep total$ | cut -f1"],
-                             working_dir=mountpoint, return_stdout=True)
-    return result
-
-
-def copy_files(args):
-    # Mount the device rootfs
-    mountpoint = mount_device_rootfs(args)
-
-    # Get all folders inside the device rootfs
+    # Get all folders inside the device rootfs (except for home)
     folders = []
-    for path in glob.glob(args.work + "/chroot_native" + mountpoint + "/*"):
+    for path in glob.glob(mountpoint_outside + "/*"):
+        if path.endswith("/home"):
+            continue
         folders += [os.path.basename(path)]
 
     # Run the copy command
     pmb.chroot.root(args, ["cp", "-a"] + folders + ["/mnt/install/"],
                     working_dir=mountpoint)
 
-# copy over keys and delete unneded mount folders
 
-
-def fix_mount_folders(args):
-    # copy over keys
-    rootfs = args.work + "/chroot_native/mnt/install/"
+def copy_files_other(args):
+    """
+    Copy over keys, create /home/user.
+    """
+    # Copy over keys
+    rootfs = args.work + "/chroot_native/mnt/install"
     for key in glob.glob(args.work + "/config_apk_keys/*.pub"):
         pmb.helpers.run.root(args, ["cp", key, rootfs + "/etc/apk/keys/"])
 
-    # delete everything (-> empty mount folders) in /home/user
-    pmb.helpers.run.root(args, ["rm", "-r", rootfs + "/home/user"])
-    pmb.helpers.run.root(args, ["mkdir", rootfs + "/home/user"])
+    # Create /home/user
+    pmb.helpers.run.root(args, ["mkdir", "-p", rootfs + "/home/user"])
     pmb.helpers.run.root(args, ["chown", pmb.config.chroot_uid_user,
                                 rootfs + "/home/user"])
 
@@ -106,21 +121,38 @@ def set_user_password(args):
             pass
 
 
-def install_system_image(args):
-    size_image = str(int(float(get_chroot_size(args)) * 1.15)) + "M"
-    size_boot = str(int(get_chroot_boot_size(args)) + 5) + "M"
+def copy_ssh_key(args):
+    """
+    Offer to copy user's SSH public key to the device if it exists
+    """
+    user_ssh_pubkey = os.path.expanduser("~/.ssh/id_rsa.pub")
+    target = args.work + "/chroot_native/mnt/install/home/user/.ssh"
+    if os.path.exists(user_ssh_pubkey):
+        if pmb.helpers.cli.confirm(args, "Would you like to copy your SSH public key to the device?"):
+            pmb.helpers.run.root(args, ["mkdir", target])
+            pmb.helpers.run.root(args, ["chmod", "700", target])
+            pmb.helpers.run.root(args, ["cp", user_ssh_pubkey, target + "/authorized_keys"])
+            pmb.helpers.run.root(args, ["chown", "-R", "12345:12345", target])
+    else:
+        logging.info("NOTE: No public SSH key found, you will only be able to use SSH password authentication!")
 
+
+def install_system_image(args):
     # Partition and fill image/sdcard
     logging.info("*** (3/5) PREPARE INSTALL BLOCKDEVICE ***")
     pmb.chroot.shutdown(args, True)
+    (size_image, size_boot) = get_subpartitions_size(args)
     pmb.install.blockdevice.create(args, size_image)
     pmb.install.partition(args, size_boot)
     pmb.install.format(args)
 
     # Just copy all the files
     logging.info("*** (4/5) FILL INSTALL BLOCKDEVICE ***")
-    copy_files(args)
-    fix_mount_folders(args)
+    copy_files_from_chroot(args)
+    copy_files_other(args)
+
+    # If user has a ssh pubkey, offer to copy it to device
+    copy_ssh_key(args)
     pmb.chroot.shutdown(args, True)
 
     # Convert system image to sparse using img2simg
@@ -221,7 +253,7 @@ def install(args):
     for flavor in pmb.chroot.other.kernel_flavors_installed(args, suffix):
         pmb.chroot.initfs.build(args, flavor, suffix)
 
-    # Finally set the user password
+    # Set the user password
     set_user_password(args)
 
     if args.android_recovery_zip:
