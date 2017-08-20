@@ -230,6 +230,7 @@ install_device_packages = [
 # chroot, before the flash programs get started.
 flash_mount_bind = [
     "/sys/bus/usb/devices/",
+    "/sys/dev/",
     "/sys/devices/",
     "/dev/bus/usb/"
 ]
@@ -293,9 +294,10 @@ flashers = {
             "depends": ["android-tools"],
             "actions":
             {
-                "list_devices": [["adb", "devices"]],
-                "sideload": [["adb", "wait-for-usb-sideload"],
-                             ["adb", "sideload", "$RECOVERY_ZIP"]],
+                "list_devices": [["adb", "-P", "5038", "devices"]],
+                "sideload": [["adb", "-P", "5038", "wait-for-usb-sideload"],
+                             ["adb", "-P", "5038", "sideload",
+                              "$RECOVERY_ZIP"]],
             }
     },
 }
