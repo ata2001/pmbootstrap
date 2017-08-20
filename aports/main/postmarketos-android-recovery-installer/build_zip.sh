@@ -31,4 +31,4 @@ copy_files "$BINARIES" bin/
 copy_files "$LIBRARIES" lib/
 check_whether_exists rootfs.tar.gz
 [ "$FLASH_BOOT" = "true" ] && check_whether_exists boot.img
-zip -r "pmos-$DEVICE.zip" .
+zip -0 -r "pmos-$DEVICE.zip" .
