@@ -83,7 +83,7 @@ def android_recovery_zip(args, folder):
     Export android recovery compatible zip.
     """
     recovery_zip = "pmos-" + args.device + ".zip"
-    file = "".join([args.work, "/chroot_native",
+    file = "".join([args.work, "/chroot_buildroot_" + args.deviceinfo["arch"],
                     "/var/lib/postmarketos-android-recovery-installer/",
                     recovery_zip])
     link = folder + "/" + recovery_zip
