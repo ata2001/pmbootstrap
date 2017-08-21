@@ -19,12 +19,12 @@ package() {
 	mkdir -p "$pkgdir/var/lib/postmarketos-android-recovery-installer/META-INF/com/google/android/"
 	install -Dm644 "$srcdir"/update-binary \
 		"$pkgdir/var/lib/postmarketos-android-recovery-installer/META-INF/com/google/android/update-binary"
-	mkdir -p "$pkgdir/usr/sahre/postmarketos-android-recovery-installer/bin/"
+	mkdir "$pkgdir/var/lib/postmarketos-android-recovery-installer/bin/"
 	for file in pmos_install pmos_install_functions pmos_setpw; do
 		install -Dm755 "$srcdir/$file" \
 			"$pkgdir/var/lib/postmarketos-android-recovery-installer/bin/$file"
 	done
-	mkdir -p "$pkgdir/usr/sahre/postmarketos-android-recovery-installer/lib/"
+	mkdir "$pkgdir/var/lib/postmarketos-android-recovery-installer/lib/"
 }
 sha512sums="42da74e5fa2ca17d906b04fe22995f0eb83b16f0adacf1cd76d93243eebd804d1fe10daf1ae1726303c47748fe1c0656b2cab6b3ea3aeb874ba73e05ecbf1b1d  build_zip.sh
 e5c46810d0e2bf85e646bba1b0962d04b5b35b91f8a596bd3f806b4a6e8a801040193c0950847501073166ab87ac097b291aad1e7a27b4877d5ff8bac297b3db  update-binary
