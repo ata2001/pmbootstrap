@@ -24,11 +24,6 @@ parse_commandline()
 	outfile_extra=$2-extra
 	kernel=$3
 	modules_path="/lib/modules/${kernel}"
-
-	if [ ! -d ${abi_path} ]; then
-		echo "ERROR: Modules path not found: ${modules_path}"
-		exit 1
-	fi
 }
 
 create_folders()
@@ -127,11 +122,13 @@ get_binaries_extra()
 # FIXME: this is a performance bottleneck
 # $1: files
 # $2: destination
+# $3: file mode bits (as in chmod), default: 755
 copy_files()
 {
+	mode="${3:-755}"
 	for file in $1; do
 		[ -e "$file" ] || continue
-		install -Dm755 "$file" "$2$file"
+		install -Dm$mode "$file" "$2$file"
 	done
 }
 
@@ -144,7 +141,6 @@ create_device_nodes()
 
 replace_init_variables()
 {
-	sed -i "s:@MODULES@:${deviceinfo_modules_initfs} ext4:g" "$tmpdir/init"
 	sed -i "s:@INITRAMFS_EXTRA@:${outfile_extra}:g" "$tmpdir/init"
 }
 
@@ -251,6 +247,7 @@ tmpdir=$(mktemp -d /tmp/mkinitfs.XXXXXX)
 create_folders
 copy_files "$(get_modules)" "$tmpdir"
 copy_files "$(get_binaries)" "$tmpdir"
+copy_files "/etc/deviceinfo" "$tmpdir" "644"
 copy_files "/etc/postmarketos-mkinitfs/hooks/*.sh" "$tmpdir"
 create_device_nodes
 ln -s "/bin/busybox" "$tmpdir/bin/sh"
