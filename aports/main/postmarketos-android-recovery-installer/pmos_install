@@ -45,7 +45,12 @@ ui_print "Formatting pmOS_boot..."
 mkfs.ext2 -q -L 'pmOS_boot' "$PMOS_BOOT"
 ui_print "Mounting pmOS_boot..."
 mkdir /"$INSTALL_PARTITION"/boot
-mount -t ext2 -rw "$PMOS_BOOT" /"$INSTALL_PARTITION"/boot
+mount -t ext2 -rw "$PMOS_BOOT" /"$INSTALL_PARTITION"/boot || {
+	ui_print "Failed to format/mount ext2 partition."
+	ui_print "Trying ext4..."
+	make_ext4fs -L 'pmOS_boot' "$PMOS_BOOT"
+	mount -t ext4 -rw "$PMOS_BOOT" /"$INSTALL_PARTITION"/boot
+}
 ui_print "Installing rootfs..."
 tar -xf rootfs.tar.gz -C /"$INSTALL_PARTITION"
 if [ "$FLASH_BOOTIMG" = "true" ]
