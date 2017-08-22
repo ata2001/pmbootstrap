@@ -49,9 +49,6 @@ def arguments_flasher(subparser):
     export.add_argument("export_folder", help="export folder, defaults to"
                                               " /tmp/postmarketOS-export",
                         default="/tmp/postmarketOS-export", nargs="?")
-    export.add_argument("--android-recovery-zip",
-                        help="export android recovery flashable zip",
-                        action="store_true", dest="android_recovery_zip")
     export.add_argument("--odin", help="odin flashable tar (boot.img/kernel+initramfs only)",
                         action="store_true", dest="odin_flashable_tar")
     return ret
