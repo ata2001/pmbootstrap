@@ -187,10 +187,10 @@ def arguments():
     install.add_argument("--android-recovery-zip",
                          help="generate TWRP flashable zip",
                          action="store_true", dest="android_recovery_zip")
-    install.add_argument("--recovery-flash_bootimg",
+    install.add_argument("--recovery-flash-bootimg",
                          help="include kernel in recovery flashable zip",
                          action="store_true", dest="recovery_flash_bootimg")
-    install.add_argument("--recovery-install_partition", default="system",
+    install.add_argument("--recovery-install-partition", default="system",
                          help="partition to flash from recovery,"
                               "eg. external_sd",
                          dest="recovery_install_partition")
