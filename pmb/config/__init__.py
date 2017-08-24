@@ -295,7 +295,8 @@ flashers = {
             "actions":
             {
                 "list_devices": [["adb", "-P", "5038", "devices"]],
-                "sideload": [["adb", "-P", "5038", "wait-for-usb-sideload"],
+                "sideload": [["echo", "< wait for any device >"],
+                             ["adb", "-P", "5038", "wait-for-usb-sideload"],
                              ["adb", "-P", "5038", "sideload",
                               "$RECOVERY_ZIP"]],
             }
