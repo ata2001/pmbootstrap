@@ -19,6 +19,7 @@ along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 import logging
 
 import pmb.chroot
+from pmb.flasher.frontend import parse_flavor_arg
 
 
 def create_zip(args, suffix):
@@ -27,8 +28,7 @@ def create_zip(args, suffix):
     """
     zip_root = "/var/lib/postmarketos-android-recovery-installer/"
     rootfs = "/mnt/rootfs_" + args.device
-    flavor = pmb.chroot.other.kernel_flavor_autodetect(args,
-                                                       "rootfs_" + args.device)
+    flavor = parse_flavor_arg(args)
 
     # Install recovery installer package in buildroot
     pmb.chroot.apk.install(args,
