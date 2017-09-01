@@ -194,7 +194,7 @@ def arguments():
                          action="store_false", dest="full_disk_encryption")
     install.add_argument("--flavor",
                          help="Specify kernel flavor to include in recovery"
-                              "flashable zip", default=None)
+                              " flashable zip", default=None)
     install.add_argument("--android-recovery-zip",
                          help="generate TWRP flashable zip",
                          action="store_true", dest="android_recovery_zip")
