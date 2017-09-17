@@ -99,7 +99,7 @@ tar -xf rootfs.tar.gz -C /"$INSTALL_PARTITION"
 if [ "$FLASH_BOOTIMG" = "true" ]
 then
 	ui_print "Flashing boot.img..."
-	dd if=boot.img of="$BOOT"
+	dd if="$INSTALL_PARTITION"/boot/boot.img-"$FLAVOR" of="$BOOT"
 fi
 if [ "$FDE" = "true" ]
 then

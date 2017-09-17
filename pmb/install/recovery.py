@@ -42,10 +42,21 @@ def create_zip(args, suffix):
               "w") as install_options:
         install_options.write(
             "\n".join(['DEVICE="{}"'.format(args.device),
-                       'FLASH_BOOTIMG="{}"'.format(
-                           str(args.recovery_flash_bootimg).lower()),
+                       'FLAVOR="{}"'.format(flavor),
                        'INSTALL_PARTITION="{}"'.format(
                            args.recovery_install_partition),
+                       'ISOREC="{}"'.format(args.deviceinfo["flash_methods"] ==
+                                            "heimdall-isorec"),
+                       'KERNEL_PARTITION="{}"'.format(
+                           args.deviceinfo["heimdall_partition_kernel"]
+                       if args.deviceinfo["flash_methods"] == "heimdall_isorec"
+                       else "KERNEL"),
+                       'INITFS_PARTITION="{}"'.format(
+                           args.deviceinfo["heimdall_partition_initfs"]
+                       if args.deviceinfo["flash_methods"] == "heimdall_isorec"
+                       else "RECOVERY"),
+                       'FLASH_BOOTIMG="{}"'.format(
+                           str(args.recovery_flash_bootimg).lower()),
                        'CIPHER="{}"'.format(args.cipher),
                        'FDE="{}"'.format(
                            str(args.full_disk_encryption).lower())]))
@@ -53,8 +64,6 @@ def create_zip(args, suffix):
     commands = [
         # Move config file from /tmp/ to zip root
         ["mv", "/tmp/install_options", "install_options"],
-        # Copy boot.img to zip root
-        ["cp", rootfs + "/boot/boot.img-" + flavor, "boot.img"],
         # Create tar archive of the rootfs
         ["tar", "-pczf", "rootfs.tar.gz", "--exclude", "./home/user/*",
          "-C", rootfs, "."],
