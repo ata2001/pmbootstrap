@@ -1,4 +1,4 @@
-#!/sbin/ash
+#!/bin/ash
 # shellcheck shell=dash
 
 # Copyright 2017 Attila Szöllősi
@@ -18,19 +18,8 @@
 # You should have received a copy of the GNU General Public License
 # along with postmarketos-android-recovery-installer.  If not, see <http://www.gnu.org/licenses/>.
 
-export OUTFD=$1
-export ZIP=$2
-export WORKING_DIR="/tmp/postmarketos"
-export PATH=$PATH:"$WORKING_DIR"/bin
-
-# Use findfs and umount from util-linux
-# shellcheck disable=SC2139
-alias findfs="$WORKING_DIR/bin/findfs"
-# shellcheck disable=SC2139
-alias umount="$WORKING_DIR/bin/umount"
-
 # shellcheck source=/dev/null
-. "$WORKING_DIR"/install_options
+. /install_options
 
 # taken from https://github.com/Debuffer-XDA/Gov-Tuner/blob/master/META-INF/com/google/android/update-binary
 # Copyright (c) 2016 - 2017 Debuffer

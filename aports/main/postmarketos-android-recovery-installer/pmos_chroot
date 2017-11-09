@@ -1,0 +1,14 @@
+#!/sbin/sh
+set -e
+export CHROOT="/tmp/postmarketos/chroot"
+unzip "$ZIP" chroot/* -d "/tmp/postmarketos"
+touch "$CHROOT"/pmos.zip
+mount --bind "$ZIP" "$CHROOT"/pmos.zip
+for mountpoint in "/dev" "/proc" "/sys"
+do
+	mkdir -p "$CHROOT""$mountpoint"
+	mount --bind "$mountpoint" "$CHROOT""$mountpoint"
+done
+chmod 755 "$CHROOT"/bin/*
+chmod 755 "$CHROOT"/lib/*
+chroot "$CHROOT" /bin/pmos_install
